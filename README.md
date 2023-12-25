@@ -54,6 +54,7 @@ const prisma = new PrismaClient().$extends(
     pages: {
       limit: 10, // set default limit to 10
       includePageCount: true, // include counters by default
+      callback: ({data, meta}) => ([data, meta]) // change default return
     },
     cursor: {
       limit: 10, // set default limit to 10
