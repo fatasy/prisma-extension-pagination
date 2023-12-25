@@ -1,22 +1,23 @@
 import { resetOrdering, resetSelection } from "./helpers";
 import {
-  PageNumberPaginationMeta,
   PageNumberPaginationOptions,
+  PaginatorResult,
   PrismaModel,
-  PrismaQuery,
+  PrismaQuery
 } from "./types";
 
 export const paginateWithPages = async (
   model: PrismaModel,
   query: PrismaQuery,
-  { page, limit, includePageCount }: Required<PageNumberPaginationOptions>,
-): Promise<[unknown, PageNumberPaginationMeta<typeof includePageCount>]> => {
+  { page, limit, includePageCount, callback }: Required<PageNumberPaginationOptions>,
+): Promise<PaginatorResult<typeof includePageCount> | ReturnType<typeof callback>> => {
   const previousPage = page > 1 ? page - 1 : null;
 
   let results;
   let nextPage;
   let pageCount = null;
   let totalCount = null;
+
   if (includePageCount) {
     [results, totalCount] = await Promise.all([
       model.findMany({
@@ -50,22 +51,28 @@ export const paginateWithPages = async (
     }
   }
 
-  return [
-    results,
-    {
-      ...{
-        isFirstPage: previousPage === null,
-        isLastPage: nextPage === null,
-        currentPage: page,
-        previousPage,
-        nextPage,
-      },
-      ...(includePageCount === true
-        ? {
-            pageCount,
-            totalCount,
-          }
-        : {}),
+  const meta = {
+    ...{
+      isFirstPage: previousPage === null,
+      isLastPage: nextPage === null,
+      currentPage: page,
+      previousPage,
+      nextPage,
     },
-  ];
+    ...(includePageCount === true
+      ? {
+        pageCount,
+        totalCount,
+      }
+      : {}),
+  }
+
+  if (callback) {
+    return callback({ data: results, meta });
+  }
+
+  return {
+    data: results,
+    meta
+  }
 };

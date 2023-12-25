@@ -10,6 +10,7 @@ export type PageNumberPaginationOptions = {
   limit: number;
   page?: number;
   includePageCount?: boolean;
+  callback?: ({ data, meta }: PaginatorResult) => unknown;
 };
 
 export type PageNumberPagination = {
@@ -24,6 +25,11 @@ export type PageNumberCounters = {
   pageCount: number;
   totalCount: number;
 };
+
+export type PaginatorResult<TWithCounters extends boolean = false> = {
+  data: unknown[]
+  meta: PageNumberPaginationMeta<TWithCounters>
+}
 
 export type PageNumberPaginationMeta<
   TWithCounters extends boolean | undefined = false,
