@@ -10,7 +10,7 @@ export const paginateWithPages = async (
   model: PrismaModel,
   query: PrismaQuery,
   { page, limit, includePageCount, callback }: Required<PageNumberPaginationOptions>,
-): Promise<PaginatorResult<typeof includePageCount> | ReturnType<typeof callback>> => {
+): Promise<PaginatorResult<unknown, typeof includePageCount> | ReturnType<typeof callback>> => {
   const previousPage = page > 1 ? page - 1 : null;
 
   let results;

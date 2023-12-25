@@ -1,16 +1,16 @@
 import { Prisma } from "@prisma/client";
-import {
-  PageNumberPaginationOptions,
-  PageNumberPaginationMeta,
-  CursorPaginationOptions,
-  CursorPaginationMeta,
-  PrismaModel,
-  PrismaQuery,
-  GetCursorFunction,
-  ParseCursorFunction,
-} from "./types";
-import { paginateWithPages } from "./page-number";
 import { paginateWithCursor } from "./cursor";
+import { paginateWithPages } from "./page-number";
+import {
+  CursorPaginationMeta,
+  CursorPaginationOptions,
+  GetCursorFunction,
+  PageNumberPaginationOptions,
+  PaginatorResult,
+  ParseCursorFunction,
+  PrismaModel,
+  PrismaQuery
+} from "./types";
 
 type Paginator<O extends PaginatorOptions> = <T, A>(
   this: T,
@@ -20,67 +20,64 @@ type Paginator<O extends PaginatorOptions> = <T, A>(
   >,
 ) => {
   withPages: O["pages"] extends { limit: number } // if global limit provided
-    ? <
-        TOptions extends Omit<P, "limit">,
-        P extends PageNumberPaginationOptions,
-      >(
-        // make limit optional
-        options?: TOptions & { limit?: P["limit"] },
-      ) => Promise<
-        [
-          Prisma.Result<T, A, "findMany">,
-          PageNumberPaginationMeta<
-            // if includePageCount provided
-            TOptions extends { includePageCount: boolean }
-              ? TOptions["includePageCount"]
-              : // else if global includePageCount provided
-              O["pages"] extends { includePageCount: boolean }
-              ? O["pages"]["includePageCount"]
-              : // else
-                false
-          >,
-        ]
-      >
-    : <
-        TOptions extends PageNumberPaginationOptions,
-        P extends PageNumberPaginationOptions,
-      >(
-        options: TOptions & { limit: P["limit"] },
-      ) => Promise<
-        [
-          Prisma.Result<T, A, "findMany">,
-          PageNumberPaginationMeta<
-            // if includePageCount provided
-            TOptions extends { includePageCount: boolean }
-              ? TOptions["includePageCount"]
-              : // else if global includePageCount provided
-              O["pages"] extends { includePageCount: boolean }
-              ? O["pages"]["includePageCount"]
-              : false
-          >,
-        ]
-      >;
+  ? <
+    TOptions extends Omit<P, "limit">,
+    P extends PageNumberPaginationOptions,
+  >(
+    // make limit optional
+    options?: TOptions & { limit?: P["limit"] },
+  ) => Promise<
+    PaginatorResult<
+      Prisma.Result<T, A, "findMany">,
+      // if includePageCount provided
+      TOptions extends { includePageCount: boolean }
+      ? TOptions["includePageCount"]
+      : // else if global includePageCount provided
+      O["pages"] extends { includePageCount: boolean }
+      ? O["pages"]["includePageCount"]
+      : // else
+      false
+    >
+  >
+  : <
+    TOptions extends PageNumberPaginationOptions,
+    P extends PageNumberPaginationOptions,
+  >(
+    options: TOptions & { limit: P["limit"] },
+  ) => Promise<
+    PaginatorResult<
+      Prisma.Result<T, A, "findMany">,
+      // if includePageCount provided
+      TOptions extends { includePageCount: boolean }
+      ? TOptions["includePageCount"]
+      : // else if global includePageCount provided
+      O["pages"] extends { includePageCount: boolean }
+      ? O["pages"]["includePageCount"]
+      : false
+
+    >
+  >;
 
   withCursor: O["cursor"] extends { limit: number } // if global limit provided
-    ? <
-        TOptions extends Omit<P, "limit">,
-        P extends CursorPaginationOptions<
-          Prisma.Result<T, A, "findMany">[number],
-          NonNullable<Prisma.Args<T, "findMany">["cursor"]>
-        >,
-      >(
-        // make limit optional
-        options?: TOptions & { limit?: P["limit"] },
-      ) => Promise<[Prisma.Result<T, A, "findMany">, CursorPaginationMeta]>
-    : <
-        TOptions extends Omit<P, "limit">,
-        P extends CursorPaginationOptions<
-          Prisma.Result<T, A, "findMany">[number],
-          NonNullable<Prisma.Args<T, "findMany">["cursor"]>
-        >,
-      >(
-        options: TOptions & { limit: P["limit"] },
-      ) => Promise<[Prisma.Result<T, A, "findMany">, CursorPaginationMeta]>;
+  ? <
+    TOptions extends Omit<P, "limit">,
+    P extends CursorPaginationOptions<
+      Prisma.Result<T, A, "findMany">[number],
+      NonNullable<Prisma.Args<T, "findMany">["cursor"]>
+    >,
+  >(
+    // make limit optional
+    options?: TOptions & { limit?: P["limit"] },
+  ) => Promise<[Prisma.Result<T, A, "findMany">, CursorPaginationMeta]>
+  : <
+    TOptions extends Omit<P, "limit">,
+    P extends CursorPaginationOptions<
+      Prisma.Result<T, A, "findMany">[number],
+      NonNullable<Prisma.Args<T, "findMany">["cursor"]>
+    >,
+  >(
+    options: TOptions & { limit: P["limit"] },
+  ) => Promise<[Prisma.Result<T, A, "findMany">, CursorPaginationMeta]>;
 };
 
 type PaginatorOptions = {
@@ -103,7 +100,7 @@ export const createPaginator = <O extends PaginatorOptions>(
   function paginate(this, args) {
     return {
       withPages: async (options = {}) => {
-        const { page, limit, includePageCount } = {
+        const { page, limit, includePageCount, callback = () => { } } = {
           page: 1,
           includePageCount: false,
           ...globalOptions?.pages,
@@ -131,6 +128,7 @@ export const createPaginator = <O extends PaginatorOptions>(
           limit,
           page,
           includePageCount,
+          callback,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }) as any;
       },

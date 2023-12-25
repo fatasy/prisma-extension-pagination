@@ -1,6 +1,6 @@
 {
-  "name": "prisma-extension-pagination",
-  "version": "0.6.0",
+  "name": "f-prisma-extension-pagination",
+  "version": "0.7.0",
   "description": "Prisma Client extension for pagination",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deptyped/prisma-extension-pagination.git"
+    "url": "git+https://github.com/fatasy/prisma-extension-pagination.git"
   },
   "keywords": [
     "node",
@@ -25,12 +25,12 @@
     "prisma-client",
     "prisma-extension"
   ],
-  "author": "deptyped <deptyped@gmail.com>",
+  "author": "fatasy <marcelo.fatasy@hotmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/deptyped/prisma-extension-pagination/issues"
+    "url": "https://github.com/fatasy/prisma-extension-pagination/issues"
   },
-  "homepage": "https://github.com/deptyped/prisma-extension-pagination#readme",
+  "homepage": "https://github.com/fatasy/prisma-extension-pagination#readme",
   "peerDependencies": {
     "@prisma/client": "^4.9.0 || ^5.0.0"
   },
